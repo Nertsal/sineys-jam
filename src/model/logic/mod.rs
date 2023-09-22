@@ -1,13 +1,23 @@
 use super::*;
 
 impl Model {
-    pub fn update(&mut self, delta_time: Time) {
+    pub fn update(&mut self, input: PlayerInput, delta_time: Time) {
         self.generate_level(delta_time);
 
+        self.player_control(input, delta_time);
         self.gravity(delta_time);
         self.movement(delta_time);
 
         self.collide_clouds(delta_time);
+    }
+
+    fn player_control(&mut self, input: PlayerInput, delta_time: Time) {
+        let (velocity,) = get!(self.bodies, self.player.body, (&mut velocity)).unwrap();
+        let speed = 5.0.as_r32();
+        let acceleration = 10.0.as_r32();
+        let target_vel = input.input_dir.x.clamp_abs(Coord::ONE) * speed;
+        let change = (target_vel - velocity.x) * acceleration * delta_time;
+        velocity.x += change;
     }
 
     fn gravity(&mut self, delta_time: Time) {
