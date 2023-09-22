@@ -19,9 +19,14 @@ impl Model {
 
     fn player_control(&mut self, input: PlayerInput, delta_time: Time) {
         let (&position, velocity, &grounded, &mass) = get!(
-            self.bodies,
+            self.doodles,
             self.player.body,
-            (&collider.position, &mut velocity, &grounded, &mass)
+            (
+                &body.collider.position,
+                &mut body.velocity,
+                &grounded,
+                &body.mass
+            )
         )
         .unwrap();
         let speed = 5.0.as_r32();
@@ -65,9 +70,9 @@ impl Model {
 
     fn camera_control(&mut self, delta_time: Time) {
         let (&player_pos, &_player_vel) = get!(
-            self.bodies,
+            self.doodles,
             self.player.body,
-            (&collider.position, &velocity)
+            (&body.collider.position, &body.velocity)
         )
         .unwrap();
 
@@ -88,17 +93,21 @@ impl Model {
     fn gravity(&mut self, delta_time: Time) {
         let gravity = vec2(0.0, -9.8).as_r32() * delta_time;
 
-        for id in self.bodies.ids() {
-            let (velocity,) = get!(self.bodies, id, (&mut velocity)).unwrap();
+        for id in self.doodles.ids() {
+            let (velocity,) = get!(self.doodles, id, (&mut body.velocity)).unwrap();
             *velocity += gravity;
         }
     }
 
     fn movement(&mut self, delta_time: Time) {
         // Bodies
-        for id in self.bodies.ids() {
-            let (position, &velocity) =
-                get!(self.bodies, id, (&mut collider.position, &velocity)).unwrap();
+        for id in self.doodles.ids() {
+            let (position, &velocity) = get!(
+                self.doodles,
+                id,
+                (&mut body.collider.position, &body.velocity)
+            )
+            .unwrap();
             position.shift((velocity) * delta_time);
         }
 
@@ -166,11 +175,16 @@ impl Model {
     }
 
     fn collide_clouds(&mut self, _delta_time: Time) {
-        for body_id in self.bodies.ids() {
+        for body_id in self.doodles.ids() {
             let (&body_mass, body_collider, body_vel, body_grounded) = get!(
-                self.bodies,
+                self.doodles,
                 body_id,
-                (&mass, &mut collider, &mut velocity, &mut grounded)
+                (
+                    &body.mass,
+                    &mut body.collider,
+                    &mut body.velocity,
+                    &mut grounded
+                )
             )
             .unwrap();
             let body_col = body_collider.clone();
@@ -218,13 +232,17 @@ impl Model {
             .unwrap();
             let bird_col = bird_collider.clone();
 
-            for body_id in self.bodies.ids() {
-                let (&body_mass, body_collider, body_vel) =
-                    get!(self.bodies, body_id, (&mass, &mut collider, &mut velocity)).unwrap();
+            for body_id in self.doodles.ids() {
+                let (&body_mass, body_collider, body_vel) = get!(
+                    self.doodles,
+                    body_id,
+                    (&body.mass, &mut body.collider, &mut body.velocity)
+                )
+                .unwrap();
                 let body_col = body_collider.clone();
 
                 if let Some(_collision) = body_col.collide(&bird_col) {
-                    let body_factor = body_mass / (body_mass + bird_mass);
+                    let body_factor = bird_mass / body_mass;
                     *body_vel += bird_vel * body_factor;
                     self.birds.remove(bird_id);
                     continue 'bird;
@@ -245,25 +263,59 @@ impl Model {
     }
 
     fn collide_triggers(&mut self, _delta_time: Time) {
-        for body_id in self.bodies.ids() {
-            let (body_collider, body_vel) =
-                get!(self.bodies, body_id, (&collider, &mut velocity)).unwrap();
+        for body_id in self.doodles.ids() {
+            let (body_collider, body_vel, &body_mass, active_triggers) = get!(
+                self.doodles,
+                body_id,
+                (
+                    &body.collider,
+                    &mut body.velocity,
+                    &body.mass,
+                    &mut active_triggers
+                )
+            )
+            .unwrap();
             let body_col = body_collider.clone();
 
+            let mut triggers = Vec::new();
             for trigger_id in self.triggers.ids() {
-                let (trigger_kind, trigger_collider) =
-                    get!(self.triggers, trigger_id, (&kind, &collider)).unwrap();
+                let (trigger_kind, trigger_collider, attachment) =
+                    get!(self.triggers, trigger_id, (&kind, &collider, &attached_to)).unwrap();
                 let trigger_col = trigger_collider.clone();
 
                 if let Some(_collision) = body_col.collide(&trigger_col) {
+                    if active_triggers.contains(&trigger_id) {
+                        continue;
+                    }
+                    triggers.push(trigger_id);
+
                     match trigger_kind {
                         TriggerKind::Spring => {
                             let jump = 5.0.as_r32();
-                            *body_vel += vec2::UNIT_Y * jump;
+                            let dir = vec2::UNIT_Y;
+                            let jump = dir * jump;
+                            // If moving away from the jump direction, redirect the velocity
+                            let proj = vec2::dot(*body_vel, dir);
+                            if proj.as_f32() < 0.0 {
+                                *body_vel -= dir * proj;
+                            }
+                            *body_vel += jump;
+
+                            if let Some(attachment) = attachment {
+                                if let Some((cloud_velocity, &cloud_mass)) = get!(
+                                    self.clouds,
+                                    attachment.cloud,
+                                    (&mut body.velocity, &body.mass)
+                                ) {
+                                    let cloud_factor = body_mass / cloud_mass;
+                                    *cloud_velocity -= jump * r32(0.3) * cloud_factor;
+                                }
+                            }
                         }
                     }
                 }
             }
+            *active_triggers = triggers;
         }
     }
 

@@ -15,7 +15,7 @@ pub struct Model {
     pub world_width: Coord,
     pub camera: Camera,
     pub player: Player,
-    pub bodies: StructOf<Arena<Body>>,
+    pub doodles: StructOf<Arena<Doodle>>,
     pub birds: StructOf<Arena<Bird>>,
     pub clouds: StructOf<Arena<Cloud>>,
     pub projectiles: StructOf<Arena<Projectile>>,
@@ -26,16 +26,16 @@ impl Model {
     pub fn new() -> Self {
         let world_width = 32.0.as_r32();
 
-        let mut bodies: StructOf<Arena<Body>> = default();
-        let player_body = bodies.insert(Body::new(
+        let mut doodles: StructOf<Arena<Doodle>> = default();
+        let player_body = doodles.insert(Doodle::new(Body::new(
             Collider::new(Position::zero(world_width), Shape::rectangle(1.0, 1.0)),
             10.0,
-        ));
+        )));
         Self {
             world_width,
             camera: Camera::new(world_width.as_f32() * 9.0 / 16.0, world_width),
             player: Player { body: player_body },
-            bodies,
+            doodles,
             birds: default(),
             clouds: default(),
             projectiles: default(),

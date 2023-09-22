@@ -21,7 +21,7 @@ impl GameRender {
         for (_, (collider,)) in query!(model.clouds, (&body.collider)) {
             self.draw_collider(&collider.clone(), Color::WHITE, &model.camera, framebuffer);
         }
-        for (_, (collider,)) in query!(model.bodies, (&collider)) {
+        for (_, (collider,)) in query!(model.doodles, (&body.collider)) {
             self.draw_collider(&collider.clone(), Color::WHITE, &model.camera, framebuffer);
         }
         for (_, (collider,)) in query!(model.birds, (&body.collider)) {

@@ -13,7 +13,6 @@ pub struct Body {
     pub collider: Collider,
     pub velocity: vec2<Coord>,
     pub mass: R32,
-    pub grounded: Option<Id>,
 }
 
 impl Body {
@@ -22,7 +21,24 @@ impl Body {
             collider,
             velocity: vec2::ZERO,
             mass: mass.as_r32(),
+        }
+    }
+}
+
+#[derive(SplitFields)]
+pub struct Doodle {
+    #[split(nested)]
+    pub body: Body,
+    pub grounded: Option<Id>,
+    pub active_triggers: Vec<Id>,
+}
+
+impl Doodle {
+    pub fn new(body: Body) -> Self {
+        Self {
+            body,
             grounded: None,
+            active_triggers: Vec::new(),
         }
     }
 }
