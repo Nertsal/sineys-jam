@@ -21,6 +21,9 @@ impl GameRender {
         for (_, (collider,)) in query!(model.bodies, (&collider)) {
             self.draw_collider(&collider.clone(), Color::WHITE, &model.camera, framebuffer);
         }
+        for (_, (collider,)) in query!(model.projectiles, (&body.collider)) {
+            self.draw_collider(&collider.clone(), Color::RED, &model.camera, framebuffer);
+        }
     }
 
     fn draw_collider(

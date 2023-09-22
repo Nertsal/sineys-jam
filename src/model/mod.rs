@@ -17,6 +17,7 @@ pub struct Model {
     pub player: Player,
     pub bodies: StructOf<Arena<Body>>,
     pub clouds: StructOf<Arena<Cloud>>,
+    pub projectiles: StructOf<Arena<Projectile>>,
 }
 
 impl Model {
@@ -40,6 +41,7 @@ impl Model {
             player: Player { body: player_body },
             bodies,
             clouds: default(),
+            projectiles: default(),
         }
     }
 }

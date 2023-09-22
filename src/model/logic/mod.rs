@@ -11,13 +11,15 @@ impl Model {
         self.collide_clouds(delta_time);
 
         self.camera_control(delta_time);
+
+        self.lifetime(delta_time);
     }
 
     fn player_control(&mut self, input: PlayerInput, delta_time: Time) {
-        let (velocity, &grounded, &mass) = get!(
+        let (&position, velocity, &grounded, &mass) = get!(
             self.bodies,
             self.player.body,
-            (&mut velocity, &grounded, &mass)
+            (&collider.position, &mut velocity, &grounded, &mass)
         )
         .unwrap();
         let speed = 5.0.as_r32();
@@ -32,11 +34,38 @@ impl Model {
                 let jump = vec2::UNIT_Y * jump;
                 *velocity += jump;
 
+                // Push off the cloud
                 let (cloud_vel, &cloud_mass) =
                     get!(self.clouds, cloud, (&mut body.velocity, &body.mass)).unwrap();
                 let cloud_factor = mass / (mass + cloud_mass);
                 *cloud_vel -= jump * cloud_factor;
             }
+        }
+
+        if input.shoot {
+            let target_pos = self.camera.cursor_pos_world();
+            let delta = position.delta_to(target_pos);
+            let dir = delta.normalize_or_zero();
+
+            let speed = 10.0.as_r32();
+            let mut proj = Projectile::new(
+                Body::new(
+                    Collider::new(
+                        position,
+                        Shape::Circle {
+                            radius: 0.2.as_r32(),
+                        },
+                    ),
+                    1.0,
+                ),
+                1.0,
+            );
+            proj.body.velocity = dir * speed;
+            self.projectiles.insert(proj);
+
+            // Recoil
+            let recoil = 5.0.as_r32();
+            *velocity -= dir * recoil;
         }
     }
 
@@ -99,6 +128,17 @@ impl Model {
 
             position.shift(*velocity * delta_time);
         }
+
+        // Projectiles
+        for id in self.projectiles.ids() {
+            let (position, &velocity) = get!(
+                self.projectiles,
+                id,
+                (&mut body.collider.position, &body.velocity)
+            )
+            .unwrap();
+            position.shift(velocity * delta_time);
+        }
     }
 
     fn collide_clouds(&mut self, _delta_time: Time) {
@@ -140,6 +180,16 @@ impl Model {
                     cloud_vel.y += relative_vel.y * cloud_factor;
                     body_vel.y -= relative_vel.y * body_factor;
                 }
+            }
+        }
+    }
+
+    fn lifetime(&mut self, delta_time: Time) {
+        for id in self.projectiles.ids() {
+            let (lifetime,) = get!(self.projectiles, id, (&mut lifetime)).unwrap();
+            lifetime.change(-delta_time);
+            if lifetime.is_min() {
+                self.projectiles.remove(id);
             }
         }
     }

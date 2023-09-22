@@ -5,6 +5,8 @@ pub use self::{collider::*, position::*};
 
 use super::*;
 
+pub type Lifetime = geng_utils::bounded::Bounded<Time>;
+
 #[derive(SplitFields)]
 pub struct Body {
     #[split(nested)]
@@ -37,6 +39,22 @@ impl Cloud {
         Self {
             anchor: body.collider.position,
             body,
+        }
+    }
+}
+
+#[derive(SplitFields)]
+pub struct Projectile {
+    #[split(nested)]
+    pub body: Body,
+    pub lifetime: Lifetime,
+}
+
+impl Projectile {
+    pub fn new(body: Body, lifetime: impl Float) -> Self {
+        Self {
+            body,
+            lifetime: Lifetime::new_max(lifetime.as_r32()),
         }
     }
 }
