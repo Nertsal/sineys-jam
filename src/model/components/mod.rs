@@ -22,3 +22,19 @@ impl Body {
         }
     }
 }
+
+#[derive(SplitFields)]
+pub struct Cloud {
+    #[split(nested)]
+    pub body: Body,
+    pub anchor: Position,
+}
+
+impl Cloud {
+    pub fn new(body: Body) -> Self {
+        Self {
+            anchor: body.collider.position,
+            body,
+        }
+    }
+}
