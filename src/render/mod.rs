@@ -16,7 +16,7 @@ impl GameRender {
 
     pub fn draw(&mut self, model: &Model, framebuffer: &mut ugli::Framebuffer) {
         for (_, (collider,)) in query!(model.bodies, (&collider)) {
-            self.draw_collider(collider, Color::WHITE, &model.camera, framebuffer);
+            self.draw_collider(&collider.clone(), Color::WHITE, &model.camera, framebuffer);
         }
     }
 

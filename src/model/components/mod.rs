@@ -7,6 +7,7 @@ use super::*;
 
 #[derive(SplitFields)]
 pub struct Body {
+    #[split(nested)]
     pub collider: Collider,
     pub velocity: vec2<Coord>,
     pub mass: R32,
