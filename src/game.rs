@@ -7,6 +7,7 @@ pub struct Game {
     geng: Geng,
     render: GameRender,
     model: Model,
+    jump: bool,
 }
 
 impl Game {
@@ -15,6 +16,7 @@ impl Game {
             geng: geng.clone(),
             render: GameRender::new(geng, assets),
             model: Model::new(),
+            jump: false,
         }
     }
 
@@ -37,6 +39,7 @@ impl Game {
 
         PlayerInput {
             input_dir: move_dir,
+            jump: std::mem::take(&mut self.jump),
         }
     }
 }
@@ -47,7 +50,11 @@ impl geng::State for Game {
         self.render.draw(&self.model, framebuffer);
     }
 
-    fn handle_event(&mut self, _event: geng::Event) {}
+    fn handle_event(&mut self, event: geng::Event) {
+        if geng_utils::key::is_event_press(&event, [Key::Space]) {
+            self.jump = true;
+        }
+    }
 
     fn update(&mut self, delta_time: f64) {
         let delta_time = Time::new(delta_time as _);

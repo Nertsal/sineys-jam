@@ -6,4 +6,5 @@ pub struct Player {
 
 pub struct PlayerInput {
     pub input_dir: vec2<Coord>,
+    pub jump: bool,
 }
