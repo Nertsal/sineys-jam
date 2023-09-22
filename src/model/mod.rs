@@ -23,7 +23,7 @@ pub struct Model {
 
 impl Model {
     pub fn new() -> Self {
-        let world_width = 16.0.as_r32();
+        let world_width = 32.0.as_r32();
 
         let mut bodies: StructOf<Arena<Body>> = default();
         let player_body = bodies.insert(Body::new(
@@ -38,7 +38,7 @@ impl Model {
         ));
         Self {
             world_width,
-            camera: Camera::new(9.0, world_width),
+            camera: Camera::new(world_width.as_f32() * 9.0 / 16.0, world_width),
             player: Player { body: player_body },
             bodies,
             birds: default(),
