@@ -58,3 +58,9 @@ impl Projectile {
         }
     }
 }
+
+#[derive(SplitFields)]
+pub struct Bird {
+    #[split(nested)]
+    pub body: Body,
+}

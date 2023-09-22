@@ -16,6 +16,7 @@ pub struct Model {
     pub camera: Camera,
     pub player: Player,
     pub bodies: StructOf<Arena<Body>>,
+    pub birds: StructOf<Arena<Bird>>,
     pub clouds: StructOf<Arena<Cloud>>,
     pub projectiles: StructOf<Arena<Projectile>>,
 }
@@ -40,6 +41,7 @@ impl Model {
             camera: Camera::new(9.0, world_width),
             player: Player { body: player_body },
             bodies,
+            birds: default(),
             clouds: default(),
             projectiles: default(),
         }

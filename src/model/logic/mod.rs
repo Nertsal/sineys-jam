@@ -9,6 +9,7 @@ impl Model {
         self.movement(delta_time);
 
         self.collide_clouds(delta_time);
+        self.collide_birds(delta_time);
 
         self.camera_control(delta_time);
 
@@ -108,6 +109,17 @@ impl Model {
             position.shift((velocity) * delta_time);
         }
 
+        // Birds
+        for id in self.birds.ids() {
+            let (position, &velocity) = get!(
+                self.birds,
+                id,
+                (&mut body.collider.position, &body.velocity)
+            )
+            .unwrap();
+            position.shift((velocity) * delta_time);
+        }
+
         // Clouds
         for id in self.clouds.ids() {
             let (position, velocity, &anchor) = get!(
@@ -184,6 +196,42 @@ impl Model {
         }
     }
 
+    fn collide_birds(&mut self, _delta_time: Time) {
+        'bird: for bird_id in self.birds.ids() {
+            let (&bird_mass, bird_collider, &bird_vel) = get!(
+                self.birds,
+                bird_id,
+                (&body.mass, &mut body.collider, &body.velocity)
+            )
+            .unwrap();
+            let bird_col = bird_collider.clone();
+
+            for body_id in self.bodies.ids() {
+                let (&body_mass, body_collider, body_vel) =
+                    get!(self.bodies, body_id, (&mass, &mut collider, &mut velocity)).unwrap();
+                let body_col = body_collider.clone();
+
+                if let Some(_collision) = body_col.collide(&bird_col) {
+                    let body_factor = body_mass / (body_mass + bird_mass);
+                    *body_vel += bird_vel * body_factor;
+                    self.birds.remove(bird_id);
+                    continue 'bird;
+                }
+            }
+
+            for proj_id in self.projectiles.ids() {
+                let (proj_collider,) = get!(self.projectiles, proj_id, (&body.collider)).unwrap();
+                let proj_col = proj_collider.clone();
+
+                if let Some(_collision) = bird_col.collide(&proj_col) {
+                    self.projectiles.remove(proj_id);
+                    self.birds.remove(bird_id);
+                    continue 'bird;
+                }
+            }
+        }
+    }
+
     fn lifetime(&mut self, delta_time: Time) {
         for id in self.projectiles.ids() {
             let (lifetime,) = get!(self.projectiles, id, (&mut lifetime)).unwrap();
@@ -213,5 +261,19 @@ impl Model {
                 2.0,
             )));
         }
+
+        let mut bird = Bird {
+            body: Body::new(
+                Collider::new(
+                    Position::from_world(vec2(-3.0, 3.0).as_r32(), self.world_width),
+                    Shape::Circle {
+                        radius: 0.3.as_r32(),
+                    },
+                ),
+                2.0,
+            ),
+        };
+        bird.body.velocity = vec2::UNIT_X * 5.0.as_r32();
+        self.birds.insert(bird);
     }
 }
