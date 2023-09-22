@@ -8,4 +8,7 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.3.2", features = ["derive"] }
 geng = "0.15.0"
-geng-utils = { git = "https://github.com/Nertsal/geng-utils" }
+geng-utils = "0.1.0"
+ecs = { git = "https://github.com/geng-engine/ecs" }
+serde = { version = "1.0.188", features = ["derive"] }
+parry2d = "0.13.5"
