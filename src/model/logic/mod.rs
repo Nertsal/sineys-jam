@@ -10,6 +10,7 @@ impl Model {
 
         self.collide_clouds(delta_time);
         self.collide_birds(delta_time);
+        self.collide_triggers(delta_time);
 
         self.camera_control(delta_time);
 
@@ -50,15 +51,7 @@ impl Model {
 
             let speed = 10.0.as_r32();
             let mut proj = Projectile::new(
-                Body::new(
-                    Collider::new(
-                        position,
-                        Shape::Circle {
-                            radius: 0.2.as_r32(),
-                        },
-                    ),
-                    1.0,
-                ),
+                Body::new(Collider::new(position, Shape::circle(0.2)), 1.0),
                 1.0,
             );
             proj.body.velocity = dir * speed;
@@ -151,6 +144,25 @@ impl Model {
             .unwrap();
             position.shift(velocity * delta_time);
         }
+
+        // Triggers that are attached
+        for id in self.triggers.ids() {
+            let Some((position, attachment)) = get!(
+                self.triggers,
+                id,
+                (&mut collider.position, &attached_to.Get.Some)
+            ) else {
+                continue;
+            };
+
+            let Some((&cloud_pos,)) =
+                get!(self.clouds, attachment.cloud, (&body.collider.position))
+            else {
+                continue;
+            };
+
+            *position = cloud_pos.shifted(attachment.relative_pos);
+        }
     }
 
     fn collide_clouds(&mut self, _delta_time: Time) {
@@ -232,6 +244,29 @@ impl Model {
         }
     }
 
+    fn collide_triggers(&mut self, _delta_time: Time) {
+        for body_id in self.bodies.ids() {
+            let (body_collider, body_vel) =
+                get!(self.bodies, body_id, (&collider, &mut velocity)).unwrap();
+            let body_col = body_collider.clone();
+
+            for trigger_id in self.triggers.ids() {
+                let (trigger_kind, trigger_collider) =
+                    get!(self.triggers, trigger_id, (&kind, &collider)).unwrap();
+                let trigger_col = trigger_collider.clone();
+
+                if let Some(_collision) = body_col.collide(&trigger_col) {
+                    match trigger_kind {
+                        TriggerKind::Spring => {
+                            let jump = 5.0.as_r32();
+                            *body_vel += vec2::UNIT_Y * jump;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     fn lifetime(&mut self, delta_time: Time) {
         for id in self.projectiles.ids() {
             let (lifetime,) = get!(self.projectiles, id, (&mut lifetime)).unwrap();
@@ -247,28 +282,28 @@ impl Model {
             return;
         }
 
-        let positions = [(0.0, -3.0), (-2.0, -1.0)];
+        let positions = [(0.0, -3.0), (-2.0, -1.0), (1.0, 2.5)];
+        let clouds: Vec<Id> = positions
+            .into_iter()
+            .map(|(x, y)| {
+                self.clouds.insert(Cloud::new(Body::new(
+                    Collider::new(
+                        Position::from_world(vec2(x, y).as_r32(), self.world_width),
+                        Shape::rectangle(1.5, 0.5),
+                    ),
+                    2.0,
+                )))
+            })
+            .collect();
 
-        for (x, y) in positions {
-            self.clouds.insert(Cloud::new(Body::new(
-                Collider::new(
-                    Position::from_world(vec2(x, y).as_r32(), self.world_width),
-                    Shape::Rectangle {
-                        width: 1.5.as_r32(),
-                        height: 0.5.as_r32(),
-                    },
-                ),
-                2.0,
-            )));
-        }
+        self.triggers
+            .insert(Trigger::spring(*clouds.last().unwrap(), self.world_width));
 
         let mut bird = Bird {
             body: Body::new(
                 Collider::new(
                     Position::from_world(vec2(-3.0, 3.0).as_r32(), self.world_width),
-                    Shape::Circle {
-                        radius: 0.3.as_r32(),
-                    },
+                    Shape::circle(0.3),
                 ),
                 2.0,
             ),

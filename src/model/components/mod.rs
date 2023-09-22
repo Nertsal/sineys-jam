@@ -64,3 +64,38 @@ pub struct Bird {
     #[split(nested)]
     pub body: Body,
 }
+
+#[derive(SplitFields)]
+pub struct Trigger {
+    pub kind: TriggerKind,
+    #[split(nested)]
+    pub collider: Collider,
+    /// Cloud Id the trigger is attached to (moves together with).
+    pub attached_to: Option<Attachment>,
+}
+
+#[derive(Debug, Clone)]
+pub enum TriggerKind {
+    Spring,
+}
+
+#[derive(Debug, Clone)]
+pub struct Attachment {
+    pub relative_pos: vec2<Coord>,
+    pub cloud: Id,
+}
+
+impl Trigger {
+    pub fn spring(cloud: Id, world_width: Coord) -> Self {
+        let position = Position::zero(world_width);
+        let collider = Collider::new(position, Shape::rectangle(0.4, 0.4));
+        Self {
+            kind: TriggerKind::Spring,
+            collider,
+            attached_to: Some(Attachment {
+                relative_pos: vec2(0.0, 0.3).as_r32(),
+                cloud,
+            }),
+        }
+    }
+}

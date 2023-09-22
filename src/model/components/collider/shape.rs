@@ -7,6 +7,19 @@ pub enum Shape {
 }
 
 impl Shape {
+    pub fn circle(radius: impl Float) -> Self {
+        Self::Circle {
+            radius: radius.as_r32(),
+        }
+    }
+
+    pub fn rectangle(width: impl Float, height: impl Float) -> Self {
+        Self::Rectangle {
+            width: width.as_r32(),
+            height: height.as_r32(),
+        }
+    }
+
     pub fn to_parry(self) -> Box<dyn parry2d::shape::Shape> {
         match self {
             Shape::Circle { radius } => Box::new(parry2d::shape::Ball::new(radius.as_f32())),

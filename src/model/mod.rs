@@ -19,6 +19,7 @@ pub struct Model {
     pub birds: StructOf<Arena<Bird>>,
     pub clouds: StructOf<Arena<Cloud>>,
     pub projectiles: StructOf<Arena<Projectile>>,
+    pub triggers: StructOf<Arena<Trigger>>,
 }
 
 impl Model {
@@ -27,13 +28,7 @@ impl Model {
 
         let mut bodies: StructOf<Arena<Body>> = default();
         let player_body = bodies.insert(Body::new(
-            Collider::new(
-                Position::zero(world_width),
-                Shape::Rectangle {
-                    width: 1.0.as_r32(),
-                    height: 1.0.as_r32(),
-                },
-            ),
+            Collider::new(Position::zero(world_width), Shape::rectangle(1.0, 1.0)),
             10.0,
         ));
         Self {
@@ -44,6 +39,7 @@ impl Model {
             birds: default(),
             clouds: default(),
             projectiles: default(),
+            triggers: default(),
         }
     }
 }
