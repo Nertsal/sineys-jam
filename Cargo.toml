@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.3.2", features = ["derive"] }
-geng = { git = "https://github.com/kuviman/geng" }
+geng = "0.15.0"
+geng-utils = { git = "https://github.com/Nertsal/geng-utils" }
