@@ -14,7 +14,12 @@ impl Model {
     }
 
     fn player_control(&mut self, input: PlayerInput, delta_time: Time) {
-        let (velocity,) = get!(self.bodies, self.player.body, (&mut velocity)).unwrap();
+        let (velocity, &grounded, &mass) = get!(
+            self.bodies,
+            self.player.body,
+            (&mut velocity, &grounded, &mass)
+        )
+        .unwrap();
         let speed = 5.0.as_r32();
         let acceleration = 10.0.as_r32();
         let target_vel = input.input_dir.x.clamp_abs(Coord::ONE) * speed;
@@ -22,8 +27,16 @@ impl Model {
         velocity.x += change;
 
         if input.jump {
-            let jump = 5.0.as_r32();
-            *velocity += vec2::UNIT_Y * jump;
+            if let Some(cloud) = grounded {
+                let jump = 5.0.as_r32();
+                let jump = vec2::UNIT_Y * jump;
+                *velocity += jump;
+
+                let (cloud_vel, &cloud_mass) =
+                    get!(self.clouds, cloud, (&mut body.velocity, &body.mass)).unwrap();
+                let cloud_factor = mass / (mass + cloud_mass);
+                *cloud_vel -= jump * cloud_factor;
+            }
         }
     }
 
@@ -90,9 +103,14 @@ impl Model {
 
     fn collide_clouds(&mut self, _delta_time: Time) {
         for body_id in self.bodies.ids() {
-            let (&body_mass, body_collider, body_vel) =
-                get!(self.bodies, body_id, (&mass, &mut collider, &mut velocity)).unwrap();
+            let (&body_mass, body_collider, body_vel, body_grounded) = get!(
+                self.bodies,
+                body_id,
+                (&mass, &mut collider, &mut velocity, &mut grounded)
+            )
+            .unwrap();
             let body_col = body_collider.clone();
+            *body_grounded = None;
 
             for cloud_id in self.clouds.ids() {
                 let (&cloud_mass, cloud_collider, cloud_vel) = get!(
@@ -108,6 +126,8 @@ impl Model {
                     if relative_vel.y > Coord::ZERO {
                         continue;
                     }
+
+                    *body_grounded = Some(cloud_id);
 
                     let body_factor = cloud_mass / (body_mass + cloud_mass);
                     let cloud_factor = body_mass / (body_mass + cloud_mass);

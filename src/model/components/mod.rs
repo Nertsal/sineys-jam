@@ -11,6 +11,7 @@ pub struct Body {
     pub collider: Collider,
     pub velocity: vec2<Coord>,
     pub mass: R32,
+    pub grounded: Option<Id>,
 }
 
 impl Body {
@@ -19,6 +20,7 @@ impl Body {
             collider,
             velocity: vec2::ZERO,
             mass: mass.as_r32(),
+            grounded: None,
         }
     }
 }
