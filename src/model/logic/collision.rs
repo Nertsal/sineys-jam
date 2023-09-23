@@ -99,6 +99,7 @@ impl Model {
                 if let Some(_collision) = body_col.collide(&bird_col) {
                     let body_factor = bird_mass / body_mass;
                     *body_vel += bird_vel * body_factor;
+                    *body_vel -= vec2::UNIT_Y * body_vel.y.clamp(Coord::ZERO, r32(5.0)) * r32(0.5);
                     self.birds.remove(bird_id);
                     self.assets.sfx.oi.play();
                     self.score += 50;
