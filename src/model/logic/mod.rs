@@ -50,7 +50,7 @@ impl Model {
                 let (cloud_vel, &cloud_mass) =
                     get!(self.clouds, cloud, (&mut body.velocity, &body.mass)).unwrap();
                 let cloud_factor = mass / (mass + cloud_mass);
-                cloud_vel.y -= jump.y * cloud_factor;
+                *cloud_vel -= jump * cloud_factor;
 
                 self.assets.sfx.jump.play();
             }
@@ -138,25 +138,35 @@ impl Model {
 
         // Clouds
         for id in self.clouds.ids() {
-            let (position, velocity, &anchor) = get!(
+            let (position, velocity, anchor, &anchor_velocity) = get!(
                 self.clouds,
                 id,
-                (&mut body.collider.position, &mut body.velocity, &anchor)
+                (
+                    &mut body.collider.position,
+                    &mut body.velocity,
+                    &mut anchor,
+                    &anchor_velocity
+                )
             )
             .unwrap();
 
+            // Move the anchor
+            anchor.shift(anchor_velocity * delta_time);
+
             // Dampen
             let damp = 10.0.as_r32();
-            let damp = velocity.y.min(Coord::ONE) * damp * delta_time;
-            velocity.y -= damp;
+            let damp = velocity.clamp_len(..=Coord::ONE) * damp * delta_time;
+            *velocity -= damp;
 
             // Move towards the anchor
-            let direction = position.delta_to(anchor).y;
+            let direction = position.delta_to(*anchor);
             let elasticity = 200.0.as_r32();
-            velocity.y +=
-                direction * direction.abs().sqr().min(10.0.as_r32()) * elasticity * delta_time;
+            *velocity += direction.normalize_or_zero()
+                * direction.len().sqr().min(10.0.as_r32())
+                * elasticity
+                * delta_time;
 
-            position.shift(*velocity * delta_time);
+            position.shift((*velocity + anchor_velocity) * delta_time);
             *position = anchor.shifted(anchor.delta_to(*position).clamp_len(..=5.0.as_r32()))
         }
 
@@ -419,7 +429,7 @@ impl Model {
                 // Moving cloud
                 let dir = if rng.gen() { 1.0 } else { -1.0 }.as_r32();
                 let speed = rng.gen_range(2.0..=4.0).as_r32();
-                cloud.body.velocity = vec2::UNIT_X * dir * speed;
+                cloud.anchor_velocity = vec2::UNIT_X * dir * speed;
             }
 
             let cloud = self.clouds.insert(cloud);
