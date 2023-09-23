@@ -2,6 +2,8 @@ use super::*;
 
 impl Model {
     pub fn update(&mut self, input: PlayerInput, delta_time: Time) {
+        self.time += delta_time;
+
         self.generate_level(delta_time);
 
         self.player_control(input, delta_time);

@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-#[allow(dead_code)]
 pub struct GameRender {
     geng: Geng,
     assets: Rc<Assets>,
@@ -22,7 +21,13 @@ impl GameRender {
             self.draw_collider(&collider.clone(), Color::WHITE, &model.camera, framebuffer);
         }
         for (_, (collider,)) in query!(model.doodles, (&body.collider)) {
-            self.draw_collider(&collider.clone(), Color::WHITE, &model.camera, framebuffer);
+            self.draw_animation(
+                &collider.clone(),
+                &self.assets.sprites.doodle,
+                model.time,
+                &model.camera,
+                framebuffer,
+            );
         }
         for (_, (collider,)) in query!(model.birds, (&body.collider)) {
             self.draw_collider(&collider.clone(), Color::BLUE, &model.camera, framebuffer);
@@ -30,6 +35,42 @@ impl GameRender {
         for (_, (collider,)) in query!(model.projectiles, (&body.collider)) {
             self.draw_collider(&collider.clone(), Color::RED, &model.camera, framebuffer);
         }
+    }
+
+    fn draw_animation(
+        &self,
+        collider: &Collider,
+        animation: &[GifFrame],
+        mut time: Time,
+        camera: &Camera,
+        framebuffer: &mut ugli::Framebuffer,
+    ) {
+        let duration: Time = animation
+            .iter()
+            .map(|frame| frame.duration)
+            .fold(Time::ZERO, |a, b| a + b.as_r32());
+        time = (time / duration).fract() * duration;
+
+        let mut i = 0;
+        for (ix, frame) in animation.iter().enumerate() {
+            i = ix;
+            if time.as_f32() < frame.duration {
+                break;
+            }
+            time -= frame.duration.as_r32();
+        }
+        let frame = &animation[i];
+
+        let pos = camera.project_f32(collider.position);
+        let target = collider.compute_aabb().map(Coord::as_f32);
+        let target = target.translate(pos - target.center());
+
+        let target = geng_utils::layout::fit_aabb_width(frame.texture.size().as_f32(), target, 1.0);
+        self.geng.draw2d().draw2d(
+            framebuffer,
+            camera,
+            &draw2d::TexturedQuad::new(target, &frame.texture),
+        );
     }
 
     fn draw_collider(

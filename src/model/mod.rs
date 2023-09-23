@@ -12,6 +12,7 @@ pub type Coord = R32;
 pub type Position = PositionCylinder<Coord>;
 
 pub struct Model {
+    pub time: Time,
     pub world_width: Coord,
     /// The height up to which the world has been generated so far.
     pub generated_height: Coord,
@@ -38,6 +39,7 @@ impl Model {
         )));
         Self {
             assets,
+            time: Time::ZERO,
             world_width,
             generated_height: Coord::ZERO,
             next_bird: Time::ZERO,

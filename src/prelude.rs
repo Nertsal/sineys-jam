@@ -5,6 +5,6 @@ pub use ecs::{
     storage::arena::{Arena, Index as Id},
 };
 pub use geng::prelude::*;
-pub use geng_utils::conversions::*;
+pub use geng_utils::{conversions::*, gif::GifFrame};
 
 pub type Color = Rgba<f32>;
