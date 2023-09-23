@@ -65,11 +65,15 @@ impl GameRender {
         // let low = camera_height - model.camera.fov;
         // let high = camera_height + model.camera.fov;
 
-        let parallax = vec2(1.0, 0.8);
-        let target = camera_pos.as_dir().as_f32() * parallax;
-        let target = model
-            .camera
-            .project_f32(Position::from_world(target.as_r32(), model.world_width));
+        let parallax = vec2(1.0, 0.8).as_r32();
+        let target = camera_pos.as_dir() * parallax;
+        let target = Position::from_world(target, model.world_width);
+
+        let delta = camera_pos.delta_to(target);
+        let delta = (delta.as_f32() / background_size).map(f32::fract) * background_size;
+        let target = camera_pos.shifted(delta.as_r32());
+
+        let target = model.camera.project_f32(target);
         let target = Aabb2::point(target).extend_symmetric(background_size / 2.0);
 
         let translations = [
