@@ -14,6 +14,8 @@ impl GameRender {
     }
 
     pub fn draw(&mut self, model: &Model, framebuffer: &mut ugli::Framebuffer) {
+        self.draw_background(model, framebuffer);
+
         for (_, (collider,)) in query!(model.triggers, (&collider)) {
             self.draw_collider(&collider.clone(), Color::GREEN, &model.camera, framebuffer);
         }
@@ -49,6 +51,38 @@ impl GameRender {
                 &self.assets.sprites.bullet,
                 &model.camera,
                 framebuffer,
+            );
+        }
+    }
+
+    fn draw_background(&self, model: &Model, framebuffer: &mut ugli::Framebuffer) {
+        let background = &self.assets.sprites.background;
+        let mut background_size = background.size().as_f32();
+        background_size *= model.world_width.as_f32() / background_size.x;
+
+        let camera_pos = model.camera.center.shifted(model.camera.offset_center);
+        // let camera_height = camera_pos.to_world().y;
+        // let low = camera_height - model.camera.fov;
+        // let high = camera_height + model.camera.fov;
+
+        let parallax = vec2(1.0, 0.8);
+        let target = camera_pos.as_dir().as_f32() * parallax;
+        let target = model
+            .camera
+            .project_f32(Position::from_world(target.as_r32(), model.world_width));
+        let target = Aabb2::point(target).extend_symmetric(background_size / 2.0);
+
+        let translations = [
+            vec2(0.0, 0.0),
+            background_size * vec2::UNIT_Y,
+            -background_size * vec2::UNIT_Y,
+        ];
+        for translation in translations {
+            let target = target.translate(translation);
+            self.geng.draw2d().draw2d(
+                framebuffer,
+                &model.camera,
+                &draw2d::TexturedQuad::new(target, background),
             );
         }
     }
