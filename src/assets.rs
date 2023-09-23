@@ -25,8 +25,8 @@ pub struct Sprites {
 #[derive(geng::asset::Load)]
 pub struct Assets {
     pub sprites: Sprites,
-    // #[load(options(looped = true))]
-    // music: geng::Sound,
+    #[load(ext = "mp3", options(looped = "true"))]
+    pub music: geng::Sound,
     pub sfx: Sfx,
 }
 

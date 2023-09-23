@@ -25,6 +25,9 @@ fn main() {
     Geng::run_with(&geng_opts, |geng| async move {
         let manager = geng.asset_manager();
         let assets = assets::Assets::load(manager).await.unwrap();
+        let mut music = assets.music.effect();
+        music.set_volume(0.5);
+        music.play();
         let game = game::Game::new(&geng, &Rc::new(assets));
         geng.run_state(game).await;
     });
