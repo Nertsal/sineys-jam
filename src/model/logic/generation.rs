@@ -74,8 +74,7 @@ impl Model {
                 // With a spring
                 self.triggers
                     .insert(Trigger::spring(cloud, self.world_width));
-            }
-            if rng.gen_bool(0.2) {
+            } else if rng.gen_bool(0.75) {
                 // With a coin
                 self.triggers
                     .insert(Trigger::coin(Some(cloud), self.world_width));
