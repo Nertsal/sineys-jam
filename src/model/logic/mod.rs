@@ -50,7 +50,7 @@ impl Model {
                 let (cloud_vel, &cloud_mass) =
                     get!(self.clouds, cloud, (&mut body.velocity, &body.mass)).unwrap();
                 let cloud_factor = mass / (mass + cloud_mass);
-                *cloud_vel -= jump * cloud_factor;
+                cloud_vel.y -= jump.y * cloud_factor;
 
                 self.assets.sfx.jump.play();
             }
@@ -147,13 +147,14 @@ impl Model {
 
             // Dampen
             let damp = 10.0.as_r32();
-            *velocity -= velocity.clamp_len(..=Coord::ONE) * damp * delta_time;
+            let damp = velocity.y.min(Coord::ONE) * damp * delta_time;
+            velocity.y -= damp;
 
             // Move towards the anchor
-            let direction = position.delta_to(anchor);
+            let direction = position.delta_to(anchor).y;
             let elasticity = 200.0.as_r32();
-            *velocity +=
-                direction * direction.len().sqr().min(10.0.as_r32()) * elasticity * delta_time;
+            velocity.y +=
+                direction * direction.abs().sqr().min(10.0.as_r32()) * elasticity * delta_time;
 
             position.shift(*velocity * delta_time);
             *position = anchor.shifted(anchor.delta_to(*position).clamp_len(..=5.0.as_r32()))
@@ -171,7 +172,7 @@ impl Model {
         }
     }
 
-    fn attached_triggers(&mut self, delta_time: Time) {
+    fn attached_triggers(&mut self, _delta_time: Time) {
         // Triggers that are attached
         for id in self.triggers.ids() {
             let Some((position, attachment)) = get!(
@@ -412,7 +413,17 @@ impl Model {
             let x = rng.gen_range(0.0..=self.world_width.as_f32()).as_r32();
             let position = Position::from_world(vec2(x, y), self.world_width);
 
-            let cloud = self.clouds.insert(Cloud::new(position));
+            let mut cloud = Cloud::new(position);
+
+            if rng.gen_bool(0.3) {
+                // Moving cloud
+                let dir = if rng.gen() { 1.0 } else { -1.0 }.as_r32();
+                let speed = rng.gen_range(2.0..=4.0).as_r32();
+                cloud.body.velocity = vec2::UNIT_X * dir * speed;
+            }
+
+            let cloud = self.clouds.insert(cloud);
+
             if rng.gen_bool(0.1) {
                 // With a spring
                 self.triggers
