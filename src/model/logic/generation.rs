@@ -74,4 +74,20 @@ impl Model {
             }
         }
     }
+
+    pub fn despawn_below(&mut self) {
+        let low = self.camera.center.to_world().y - self.camera.fov;
+        for id in self.clouds.ids() {
+            let (&pos,) = get!(self.clouds, id, (&body.collider.position)).unwrap();
+            if pos.to_world().y < low {
+                self.clouds.remove(id);
+            }
+        }
+        for id in self.triggers.ids() {
+            let (&pos,) = get!(self.triggers, id, (&collider.position)).unwrap();
+            if pos.to_world().y < low {
+                self.triggers.remove(id);
+            }
+        }
+    }
 }

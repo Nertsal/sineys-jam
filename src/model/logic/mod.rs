@@ -24,8 +24,8 @@ impl Model {
         self.camera_control(delta_time);
 
         self.lifetime(delta_time);
-
         self.check_ded();
+        self.despawn_below();
     }
 
     fn gravity(&mut self, delta_time: Time) {
