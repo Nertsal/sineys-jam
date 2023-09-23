@@ -91,7 +91,7 @@ impl Model {
             delta
         });
         let delta = self.camera.center.delta_to(self.camera.target_position);
-        let time = 0.3.as_r32();
+        let time = 0.2.as_r32();
         self.camera
             .center
             .shift(delta * (delta_time / time).min(R32::ONE));
