@@ -24,10 +24,11 @@ pub struct Model {
     pub clouds: StructOf<Arena<Cloud>>,
     pub projectiles: StructOf<Arena<Projectile>>,
     pub triggers: StructOf<Arena<Trigger>>,
+    pub assets: Rc<Assets>,
 }
 
 impl Model {
-    pub fn new() -> Self {
+    pub fn new(assets: Rc<Assets>) -> Self {
         let world_width = 35.0.as_r32();
 
         let mut doodles: StructOf<Arena<Doodle>> = default();
@@ -36,6 +37,7 @@ impl Model {
             10.0,
         )));
         Self {
+            assets,
             world_width,
             generated_height: Coord::ZERO,
             next_bird: Time::ZERO,

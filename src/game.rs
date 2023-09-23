@@ -17,7 +17,7 @@ impl Game {
         Self {
             geng: geng.clone(),
             render: GameRender::new(geng, assets),
-            model: Model::new(),
+            model: Model::new(assets.clone()),
             jump: false,
             shoot: false,
             cursor_pos: vec2::ZERO,

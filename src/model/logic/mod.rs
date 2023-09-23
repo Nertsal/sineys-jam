@@ -47,10 +47,13 @@ impl Model {
                     get!(self.clouds, cloud, (&mut body.velocity, &body.mass)).unwrap();
                 let cloud_factor = mass / (mass + cloud_mass);
                 *cloud_vel -= jump * cloud_factor;
+
+                self.assets.sfx.jump.play();
             }
         }
 
         if input.shoot && shoot_timer.elapsed().as_secs_f64() > 0.3 {
+            self.assets.sfx.shoot.play();
             *shoot_timer = Instant::now();
             let target_pos = self.camera.cursor_pos_world();
             let delta = position.delta_to(target_pos);
@@ -255,6 +258,7 @@ impl Model {
                     let body_factor = bird_mass / body_mass;
                     *body_vel += bird_vel * body_factor;
                     self.birds.remove(bird_id);
+                    self.assets.sfx.oi.play();
                     continue 'bird;
                 }
             }
@@ -266,6 +270,7 @@ impl Model {
                 if let Some(_collision) = bird_col.collide(&proj_col) {
                     self.projectiles.remove(proj_id);
                     self.birds.remove(bird_id);
+                    self.assets.sfx.kill_bird.play();
                     continue 'bird;
                 }
             }
@@ -310,6 +315,7 @@ impl Model {
                             let min_jump_speed = 15.0.as_r32();
                             let proj = vec2::dot(*body_vel, dir);
                             *body_vel += dir * (min_jump_speed - proj).max(R32::ZERO);
+                            self.assets.sfx.spring.play();
 
                             if let Some(attachment) = attachment {
                                 if let Some((cloud_velocity, &cloud_mass)) = get!(
