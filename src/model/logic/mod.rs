@@ -18,13 +18,14 @@ impl Model {
     }
 
     fn player_control(&mut self, input: PlayerInput, delta_time: Time) {
-        let (&position, velocity, &grounded, &mass) = get!(
+        let (&position, velocity, &grounded, shoot_timer, &mass) = get!(
             self.doodles,
             self.player.body,
             (
                 &body.collider.position,
                 &mut body.velocity,
                 &grounded,
+                &mut shoot_timer,
                 &body.mass
             )
         )
@@ -49,7 +50,8 @@ impl Model {
             }
         }
 
-        if input.shoot {
+        if input.shoot && shoot_timer.elapsed().as_secs_f64() > 0.3 {
+            *shoot_timer = Instant::now();
             let target_pos = self.camera.cursor_pos_world();
             let delta = position.delta_to(target_pos);
             let dir = delta.normalize_or_zero();

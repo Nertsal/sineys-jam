@@ -55,6 +55,7 @@ pub struct Doodle {
     pub grounded: Option<Id>,
     pub active_triggers: Vec<Id>,
     pub coyote_timer: Instant,
+    pub shoot_timer: Instant,
 }
 
 impl Doodle {
@@ -64,6 +65,7 @@ impl Doodle {
             grounded: None,
             active_triggers: Vec::new(),
             coyote_timer: Instant::now(),
+            shoot_timer: Instant::now(),
         }
     }
 }
