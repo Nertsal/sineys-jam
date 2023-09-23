@@ -65,7 +65,11 @@ impl Model {
             let (&pos,) = get!(self.doodles, id, (&body.collider.position)).unwrap();
             if pos.delta_to(self.camera.center).y > self.camera.fov / r32(2.0) + r32(1.0) {
                 self.transition = Some(geng::state::Transition::Switch(Box::new(
-                    crate::end_screen::EndScreen::new(&self.geng, &self.assets, 69420),
+                    crate::end_screen::EndScreen::new(
+                        &self.geng,
+                        &self.assets,
+                        self.current_score(),
+                    ),
                 )));
             }
         }

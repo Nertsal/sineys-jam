@@ -15,9 +15,9 @@ impl Model {
         )
         .unwrap();
         let speed = 5.0.as_r32();
-        let acceleration = 10.0.as_r32();
+        let acceleration = 50.0.as_r32();
         let target_vel = input.input_dir.x.clamp_abs(Coord::ONE) * speed;
-        let change = (target_vel - velocity.x) * acceleration * delta_time;
+        let change = (target_vel - velocity.x).clamp_abs(acceleration * delta_time);
         velocity.x += change;
 
         if input.jump {
