@@ -138,24 +138,35 @@ impl Model {
 
         // Clouds
         for id in self.clouds.ids() {
-            let (position, velocity, &anchor) = get!(
+            let (position, velocity, anchor, &anchor_velocity) = get!(
                 self.clouds,
                 id,
-                (&mut body.collider.position, &mut body.velocity, &anchor)
+                (
+                    &mut body.collider.position,
+                    &mut body.velocity,
+                    &mut anchor,
+                    &anchor_velocity
+                )
             )
             .unwrap();
 
+            // Move the anchor
+            anchor.shift(anchor_velocity * delta_time);
+
             // Dampen
             let damp = 10.0.as_r32();
-            *velocity -= velocity.clamp_len(..=Coord::ONE) * damp * delta_time;
+            let damp = velocity.clamp_len(..=Coord::ONE) * damp * delta_time;
+            *velocity -= damp;
 
             // Move towards the anchor
-            let direction = position.delta_to(anchor);
+            let direction = position.delta_to(*anchor);
             let elasticity = 200.0.as_r32();
-            *velocity +=
-                direction * direction.len().sqr().min(10.0.as_r32()) * elasticity * delta_time;
+            *velocity += direction.normalize_or_zero()
+                * direction.len().sqr().min(10.0.as_r32())
+                * elasticity
+                * delta_time;
 
-            position.shift(*velocity * delta_time);
+            position.shift((*velocity + anchor_velocity) * delta_time);
             *position = anchor.shifted(anchor.delta_to(*position).clamp_len(..=5.0.as_r32()))
         }
 
@@ -171,7 +182,7 @@ impl Model {
         }
     }
 
-    fn attached_triggers(&mut self, delta_time: Time) {
+    fn attached_triggers(&mut self, _delta_time: Time) {
         // Triggers that are attached
         for id in self.triggers.ids() {
             let Some((position, attachment)) = get!(
@@ -432,7 +443,17 @@ impl Model {
             let x = rng.gen_range(0.0..=self.world_width.as_f32()).as_r32();
             let position = Position::from_world(vec2(x, y), self.world_width);
 
-            let cloud = self.clouds.insert(Cloud::new(position));
+            let mut cloud = Cloud::new(position);
+
+            if rng.gen_bool(0.3) {
+                // Moving cloud
+                let dir = if rng.gen() { 1.0 } else { -1.0 }.as_r32();
+                let speed = rng.gen_range(2.0..=4.0).as_r32();
+                cloud.anchor_velocity = vec2::UNIT_X * dir * speed;
+            }
+
+            let cloud = self.clouds.insert(cloud);
+
             if rng.gen_bool(0.1) {
                 // With a spring
                 self.triggers

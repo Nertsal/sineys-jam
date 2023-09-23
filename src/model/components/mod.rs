@@ -75,6 +75,7 @@ pub struct Cloud {
     #[split(nested)]
     pub body: Body,
     pub anchor: Position,
+    pub anchor_velocity: vec2<Coord>,
 }
 
 impl Cloud {
@@ -82,6 +83,7 @@ impl Cloud {
         let body = Body::new(Collider::new(position, Shape::rectangle(1.5, 0.5)), 5.0);
         Self {
             anchor: body.collider.position,
+            anchor_velocity: vec2::ZERO,
             body,
         }
     }
