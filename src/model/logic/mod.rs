@@ -102,13 +102,14 @@ impl Model {
     fn movement(&mut self, delta_time: Time) {
         // Bodies
         for id in self.doodles.ids() {
-            let (position, &velocity) = get!(
+            let (position, velocity) = get!(
                 self.doodles,
                 id,
-                (&mut body.collider.position, &body.velocity)
+                (&mut body.collider.position, &mut body.velocity)
             )
             .unwrap();
-            position.shift((velocity) * delta_time);
+            *velocity = velocity.clamp_len(..=40.0.as_r32());
+            position.shift(*velocity * delta_time);
         }
 
         // Birds
