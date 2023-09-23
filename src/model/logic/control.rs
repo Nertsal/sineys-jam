@@ -36,7 +36,7 @@ impl Model {
             }
         }
 
-        if input.shoot && shoot_timer.elapsed().as_secs_f64() > 0.3 {
+        if input.shoot && shoot_timer.elapsed().as_secs_f64() > 0.5 {
             self.assets.sfx.shoot.play();
             *shoot_timer = Instant::now();
             let target_pos = self.camera.cursor_pos_world();
