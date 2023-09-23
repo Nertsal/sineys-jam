@@ -30,7 +30,7 @@ pub struct Model {
 
 impl Model {
     pub fn new(assets: Rc<Assets>) -> Self {
-        let world_width = 35.0.as_r32();
+        let world_width = (35.0 * 0.55 ).as_r32();
 
         let mut doodles: StructOf<Arena<Doodle>> = default();
         let player_body = doodles.insert(Doodle::new(Body::new(
@@ -45,7 +45,13 @@ impl Model {
             next_bird: Time::ZERO,
             // -3 so the clouds dont teleport (visibly) from one edge of the screen to the other
             // but disappear behind the edge instead
-            camera: Camera::new((world_width.as_f32() - 3.0) * 9.0 / 16.0, world_width),
+            // // * 0.55 because it was too wide Kapp
+            camera: Camera::new(
+                (world_width.as_f32() - 3.0) 
+                    // * 0.55
+                    * 9.0 / 16.0,
+                world_width,
+            ),
             player: Player { body: player_body },
             doodles,
             birds: default(),
