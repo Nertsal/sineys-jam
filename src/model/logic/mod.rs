@@ -298,15 +298,15 @@ impl Model {
 
                     match trigger_kind {
                         TriggerKind::Spring => {
-                            let jump = 5.0.as_r32();
+                            let jump = 10.0.as_r32();
                             let dir = vec2::UNIT_Y;
                             let jump = dir * jump;
-                            // If moving away from the jump direction, redirect the velocity
-                            let proj = vec2::dot(*body_vel, dir);
-                            if proj.as_f32() < 0.0 {
-                                *body_vel -= dir * proj;
-                            }
                             *body_vel += jump;
+
+                            // Make sure we jump up with a minimum speed
+                            let min_jump_speed = 15.0.as_r32();
+                            let proj = vec2::dot(*body_vel, dir);
+                            *body_vel += dir * (min_jump_speed - proj).max(R32::ZERO);
 
                             if let Some(attachment) = attachment {
                                 if let Some((cloud_velocity, &cloud_mass)) = get!(
