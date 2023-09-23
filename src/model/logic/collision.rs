@@ -176,7 +176,9 @@ impl Model {
                         TriggerKind::Coin => {
                             self.triggers.remove(trigger_id);
                             self.score += 100;
-                            self.assets.sfx.coin.play();
+                            let mut sfx = self.assets.sfx.coin.effect();
+                            sfx.set_volume(0.2);
+                            sfx.play();
                         }
                     }
                 }
