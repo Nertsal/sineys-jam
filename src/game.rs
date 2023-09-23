@@ -17,7 +17,7 @@ impl Game {
         Self {
             geng: geng.clone(),
             render: GameRender::new(geng, assets),
-            model: Model::new(assets.clone()),
+            model: Model::new(geng.clone(), assets.clone()),
             jump: false,
             shoot: false,
             cursor_pos: vec2::ZERO,
@@ -67,6 +67,10 @@ impl geng::State for Game {
         if let geng::Event::CursorMove { position } = event {
             self.cursor_pos = position;
         }
+    }
+
+    fn transition(&mut self) -> Option<geng::state::Transition> {
+        self.model.transition.take()
     }
 
     fn update(&mut self, delta_time: f64) {

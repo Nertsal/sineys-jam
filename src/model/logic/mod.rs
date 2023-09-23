@@ -24,6 +24,8 @@ impl Model {
         self.camera_control(delta_time);
 
         self.lifetime(delta_time);
+
+        self.check_ded();
     }
 
     fn gravity(&mut self, delta_time: Time) {
@@ -41,6 +43,18 @@ impl Model {
             lifetime.change(-delta_time);
             if lifetime.is_min() {
                 self.projectiles.remove(id);
+            }
+        }
+    }
+
+    // LOL
+    fn check_ded(&mut self) {
+        for id in self.doodles.ids() {
+            let (&pos,) = get!(self.doodles, id, (&body.collider.position)).unwrap();
+            if pos.delta_to(self.camera.center).y > self.camera.fov / r32(2.0) + r32(1.0) {
+                self.transition = Some(geng::state::Transition::Switch(Box::new(
+                    crate::end_screen::EndScreen::new(&self.geng, &self.assets),
+                )));
             }
         }
     }

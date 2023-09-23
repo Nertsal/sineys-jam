@@ -3,6 +3,7 @@ mod game;
 mod model;
 mod prelude;
 mod render;
+mod end_screen;
 
 use geng::prelude::*;
 

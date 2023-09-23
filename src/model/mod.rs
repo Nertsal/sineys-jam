@@ -25,13 +25,15 @@ pub struct Model {
     pub clouds: StructOf<Arena<Cloud>>,
     pub projectiles: StructOf<Arena<Projectile>>,
     pub triggers: StructOf<Arena<Trigger>>,
+    geng: Geng,
     pub assets: Rc<Assets>,
     pub shhh: Option<geng::SoundEffect>,
     pub shhh_volume: f64,
+    pub transition: Option<geng::state::Transition>,  
 }
 
 impl Model {
-    pub fn new(assets: Rc<Assets>) -> Self {
+    pub fn new(geng: Geng, assets: Rc<Assets>) -> Self {
         let world_width = (35.0 * 0.55 ).as_r32();
 
         let mut doodles: StructOf<Arena<Doodle>> = default();
@@ -40,6 +42,8 @@ impl Model {
             10.0,
         )));
         Self {
+            geng, 
+            transition: None,
             shhh_volume: 0.0,
             shhh: None,
             assets,
@@ -63,5 +67,5 @@ impl Model {
             projectiles: default(),
             triggers: default(),
         }
-    }
+    } 
 }
