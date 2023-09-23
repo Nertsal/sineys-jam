@@ -33,19 +33,21 @@ impl Model {
         }
 
         // Birds
-        self.next_bird -= delta_time;
-        while self.next_bird < Time::ZERO {
-            self.next_bird += rng.gen_range(0.7..=2.0).as_r32();
+        if player_pos.to_world().y > r32(30.0) {
+            self.next_bird -= delta_time;
+            while self.next_bird < Time::ZERO {
+                self.next_bird += rng.gen_range(0.7..=2.0).as_r32();
 
-            let predict_time = rng.gen_range(1.0..=2.0).as_r32();
-            let height = predict_time * player_vel.y;
+                let predict_time = rng.gen_range(1.0..=2.0).as_r32();
+                let height = predict_time * player_vel.y;
 
-            let position = player_pos.shifted(vec2(self.world_width / r32(2.0), height));
+                let position = player_pos.shifted(vec2(self.world_width / r32(2.0), height));
 
-            let dir = if rng.gen() { 1.0 } else { -1.0 };
-            let speed = rng.gen_range(4.0..=6.0);
+                let dir = if rng.gen() { 1.0 } else { -1.0 };
+                let speed = rng.gen_range(4.0..=6.0);
 
-            self.birds.insert(Bird::new(position, dir * speed));
+                self.birds.insert(Bird::new(position, dir * speed));
+            }
         }
 
         // Clouds
