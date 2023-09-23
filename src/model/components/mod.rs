@@ -111,7 +111,7 @@ pub struct Bird {
 
 impl Bird {
     pub fn new(position: Position, speed: impl Float) -> Self {
-        let mut body = Body::new(Collider::new(position, Shape::circle(0.3)), 2.0);
+        let mut body = Body::new(Collider::new(position, Shape::circle(0.5)), 2.0);
         body.velocity = vec2::UNIT_X * speed.as_r32();
         Self { body }
     }
