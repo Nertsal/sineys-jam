@@ -45,6 +45,18 @@ impl Model {
                 self.projectiles.remove(id);
             }
         }
+
+        for id in self.birds.ids() {
+            let (lifetime, position) =
+                get!(self.birds, id, (&mut lifetime, &body.collider.position)).unwrap();
+            lifetime.change(-delta_time);
+            if lifetime.is_min() {
+                // Despawn if out of view
+                if position.distance(self.camera.center) > self.world_width / r32(2.0) {
+                    self.birds.remove(id);
+                }
+            }
+        }
     }
 
     // LOL
