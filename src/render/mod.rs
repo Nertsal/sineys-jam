@@ -3,6 +3,8 @@ use crate::prelude::*;
 pub struct GameRender {
     geng: Geng,
     assets: Rc<Assets>,
+    backgrounds: [usize; 3],
+    background_scroll: usize,
 }
 
 impl GameRender {
@@ -10,6 +12,8 @@ impl GameRender {
         Self {
             geng: geng.clone(),
             assets: assets.clone(),
+            backgrounds: [0, 1, 0],
+            background_scroll: 0,
         }
     }
 
@@ -71,8 +75,8 @@ impl GameRender {
         );
     }
 
-    fn draw_background(&self, model: &Model, framebuffer: &mut ugli::Framebuffer) {
-        let background = &self.assets.sprites.background;
+    fn draw_background(&mut self, model: &Model, framebuffer: &mut ugli::Framebuffer) {
+        let background = &self.assets.sprites.backgrounds[0];
         let mut background_size = background.size().as_f32();
         background_size *= model.world_width.as_f32() / background_size.x;
 
@@ -86,23 +90,35 @@ impl GameRender {
         let target = Position::from_world(target, model.world_width);
 
         let delta = camera_pos.delta_to(target);
-        let delta = (delta.as_f32() / background_size).map(f32::fract) * background_size;
+        let delta_norm = delta.as_f32() / background_size;
+
+        // Select a random tiling
+        let scroll = delta_norm.y.abs().floor() as usize;
+        if scroll > self.background_scroll {
+            self.background_scroll = scroll;
+            self.backgrounds.rotate_left(1);
+            *self.backgrounds.last_mut().unwrap() =
+                thread_rng().gen_range(0..self.assets.sprites.backgrounds.len());
+        }
+
+        let delta = delta_norm.map(f32::fract) * background_size;
         let target = camera_pos.shifted(delta.as_r32());
 
         let target = model.camera.project_f32(target);
         let target = Aabb2::point(target).extend_symmetric(background_size / 2.0);
 
         let translations = [
+            -background_size * vec2::UNIT_Y,
             vec2(0.0, 0.0),
             background_size * vec2::UNIT_Y,
-            -background_size * vec2::UNIT_Y,
         ];
-        for translation in translations {
+        for (i, translation) in translations.into_iter().enumerate() {
+            let i = self.backgrounds[i];
             let target = target.translate(translation);
             self.geng.draw2d().draw2d(
                 framebuffer,
                 &model.camera,
-                &draw2d::TexturedQuad::new(target, background),
+                &draw2d::TexturedQuad::new(target, &self.assets.sprites.backgrounds[i]),
             );
         }
     }
