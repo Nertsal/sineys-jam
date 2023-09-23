@@ -13,6 +13,8 @@ pub type Position = PositionCylinder<Coord>;
 
 pub struct Model {
     pub time: Time,
+    /// Use `current_score()` to get accurate score
+    score: i32,
     pub world_width: Coord,
     /// The height up to which the world has been generated so far.
     pub generated_height: Coord,
@@ -48,6 +50,7 @@ impl Model {
             shhh: None,
             assets,
             time: Time::ZERO,
+            score: 0,
             world_width,
             generated_height: Coord::ZERO,
             next_bird: Time::ZERO,
@@ -68,4 +71,10 @@ impl Model {
             triggers: default(),
         }
     } 
+
+    pub fn current_score(&self) -> i32 {
+        let height = self.camera.center.to_world().y.as_f32();
+        let height = (height * 5.0).floor() as i32;
+        self.score + height
+    }
 }

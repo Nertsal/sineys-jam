@@ -109,13 +109,17 @@ impl Projectile {
 pub struct Bird {
     #[split(nested)]
     pub body: Body,
+    pub lifetime: Lifetime,
 }
 
 impl Bird {
     pub fn new(position: Position, speed: impl Float) -> Self {
         let mut body = Body::new(Collider::new(position, Shape::circle(0.5)), 2.0);
         body.velocity = vec2::UNIT_X * speed.as_r32();
-        Self { body }
+        Self {
+            body,
+            lifetime: Lifetime::new_max(r32(5.0)),
+        }
     }
 }
 

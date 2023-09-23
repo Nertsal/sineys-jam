@@ -24,8 +24,8 @@ impl Model {
         self.camera_control(delta_time);
 
         self.lifetime(delta_time);
-
         self.check_ded();
+        self.despawn_below();
     }
 
     fn gravity(&mut self, delta_time: Time) {
@@ -43,6 +43,18 @@ impl Model {
             lifetime.change(-delta_time);
             if lifetime.is_min() {
                 self.projectiles.remove(id);
+            }
+        }
+
+        for id in self.birds.ids() {
+            let (lifetime, position) =
+                get!(self.birds, id, (&mut lifetime, &body.collider.position)).unwrap();
+            lifetime.change(-delta_time);
+            if lifetime.is_min() {
+                // Despawn if out of view
+                if position.distance(self.camera.center) > self.world_width / r32(2.0) {
+                    self.birds.remove(id);
+                }
             }
         }
     }

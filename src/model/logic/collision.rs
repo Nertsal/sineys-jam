@@ -101,6 +101,7 @@ impl Model {
                     *body_vel += bird_vel * body_factor;
                     self.birds.remove(bird_id);
                     self.assets.sfx.oi.play();
+                    self.score += 50;
                     continue 'bird;
                 }
             }
@@ -113,6 +114,7 @@ impl Model {
                     self.projectiles.remove(proj_id);
                     self.birds.remove(bird_id);
                     self.assets.sfx.kill_bird.play();
+                    self.score += 100;
                     continue 'bird;
                 }
             }

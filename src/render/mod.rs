@@ -58,6 +58,17 @@ impl GameRender {
                 framebuffer,
             );
         }
+
+        self.geng.default_font().draw(
+            framebuffer,
+            &geng::PixelPerfectCamera,
+            &format!("Score: {}", model.current_score()),
+            vec2(geng::TextAlign::LEFT, geng::TextAlign::TOP),
+            mat3::translate(vec2(0.02, 0.98) * framebuffer.size().as_f32())
+                * mat3::scale_uniform(50.0)
+                * mat3::translate(vec2(0.0, -0.5)),
+            Color::BLACK,
+        );
     }
 
     fn draw_background(&self, model: &Model, framebuffer: &mut ugli::Framebuffer) {
