@@ -291,10 +291,10 @@ impl Model {
                 let trigger_col = trigger_collider.clone();
 
                 if let Some(_collision) = body_col.collide(&trigger_col) {
+                    triggers.push(trigger_id);
                     if active_triggers.contains(&trigger_id) {
                         continue;
                     }
-                    triggers.push(trigger_id);
 
                     match trigger_kind {
                         TriggerKind::Spring => {
