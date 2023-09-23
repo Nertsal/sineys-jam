@@ -16,7 +16,15 @@ impl Model {
         .unwrap();
         let speed = 5.0.as_r32();
         let acceleration = 50.0.as_r32();
-        let target_vel = input.input_dir.x.clamp_abs(Coord::ONE) * speed;
+        let ground_vel = match grounded {
+            Some(cloud) => {
+                let (&vel, &anchor_vel) =
+                    get!(self.clouds, cloud, (&body.velocity, &anchor_velocity)).unwrap();
+                (vel + anchor_vel).x
+            }
+            None => Coord::ZERO,
+        };
+        let target_vel = input.input_dir.x.clamp_abs(Coord::ONE) * speed + ground_vel;
         let change = (target_vel - velocity.x).clamp_abs(acceleration * delta_time);
         velocity.x += change;
 
