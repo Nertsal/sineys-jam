@@ -13,6 +13,10 @@ pub type Position = PositionCylinder<Coord>;
 
 pub struct Model {
     pub world_width: Coord,
+    /// The height up to which the world has been generated so far.
+    pub generated_height: Coord,
+    /// The time until the next bird spawns.
+    pub next_bird: Time,
     pub camera: Camera,
     pub player: Player,
     pub doodles: StructOf<Arena<Doodle>>,
@@ -24,7 +28,7 @@ pub struct Model {
 
 impl Model {
     pub fn new() -> Self {
-        let world_width = 32.0.as_r32();
+        let world_width = 35.0.as_r32();
 
         let mut doodles: StructOf<Arena<Doodle>> = default();
         let player_body = doodles.insert(Doodle::new(Body::new(
@@ -33,7 +37,11 @@ impl Model {
         )));
         Self {
             world_width,
-            camera: Camera::new(world_width.as_f32() * 9.0 / 16.0, world_width),
+            generated_height: Coord::ZERO,
+            next_bird: Time::ZERO,
+            // -3 so the clouds dont teleport (visibly) from one edge of the screen to the other
+            // but disappear behind the edge instead
+            camera: Camera::new((world_width.as_f32() - 3.0) * 9.0 / 16.0, world_width),
             player: Player { body: player_body },
             doodles,
             birds: default(),

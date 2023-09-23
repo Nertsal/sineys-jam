@@ -51,7 +51,8 @@ pub struct Cloud {
 }
 
 impl Cloud {
-    pub fn new(body: Body) -> Self {
+    pub fn new(position: Position) -> Self {
+        let body = Body::new(Collider::new(position, Shape::rectangle(1.5, 0.5)), 2.0);
         Self {
             anchor: body.collider.position,
             body,
@@ -79,6 +80,14 @@ impl Projectile {
 pub struct Bird {
     #[split(nested)]
     pub body: Body,
+}
+
+impl Bird {
+    pub fn new(position: Position, speed: impl Float) -> Self {
+        let mut body = Body::new(Collider::new(position, Shape::circle(0.3)), 2.0);
+        body.velocity = vec2::UNIT_X * speed.as_r32();
+        Self { body }
+    }
 }
 
 #[derive(SplitFields)]
