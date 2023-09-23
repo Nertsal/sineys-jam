@@ -156,6 +156,7 @@ impl Model {
                 direction * direction.len().sqr().min(10.0.as_r32()) * elasticity * delta_time;
 
             position.shift(*velocity * delta_time);
+            *position = anchor.shifted(anchor.delta_to(*position).clamp_len(..=5.0.as_r32()))
         }
 
         // Projectiles
