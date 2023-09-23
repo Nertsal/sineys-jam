@@ -93,6 +93,8 @@ impl Model {
     }
 
     pub fn collide_birds(&mut self, _delta_time: Time) {
+        let mut particles = Vec::new();
+
         'bird: for bird_id in self.birds.ids() {
             let (&bird_mass, bird_collider, &bird_vel) = get!(
                 self.birds,
@@ -118,12 +120,19 @@ impl Model {
                     self.birds.remove(bird_id);
                     self.assets.sfx.oi.play();
                     self.score -= 50;
+                    particles.push((
+                        r32(5.0),
+                        *body_collider.position,
+                        bird_vel * r32(0.3),
+                        Color::try_from("#B16B7E").unwrap(),
+                    ));
                     continue 'bird;
                 }
             }
 
             for proj_id in self.projectiles.ids() {
-                let (proj_collider,) = get!(self.projectiles, proj_id, (&body.collider)).unwrap();
+                let (proj_collider, &proj_vel) =
+                    get!(self.projectiles, proj_id, (&body.collider, &body.velocity)).unwrap();
                 let proj_col = proj_collider.clone();
 
                 if let Some(_collision) = bird_col.collide(&proj_col) {
@@ -131,9 +140,19 @@ impl Model {
                     self.birds.remove(bird_id);
                     self.assets.sfx.kill_bird.play();
                     self.score += 100;
+                    particles.push((
+                        r32(3.0),
+                        bird_col.position,
+                        proj_vel * r32(0.3),
+                        Color::try_from("#4B071A").unwrap(),
+                    ));
                     continue 'bird;
                 }
             }
+        }
+
+        for (intensity, position, velocity, color) in particles {
+            self.spawn_particles(intensity, position, velocity, color);
         }
     }
 
