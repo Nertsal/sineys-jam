@@ -137,7 +137,7 @@ impl Model {
 
             // Move towards the anchor
             let direction = position.delta_to(anchor);
-            let elasticity = 5.0.as_r32();
+            let elasticity = 30.0.as_r32();
             *velocity += direction * direction.len().sqr() * elasticity;
 
             position.shift(*velocity * delta_time);
