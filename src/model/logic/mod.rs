@@ -174,7 +174,7 @@ impl Model {
         }
     }
 
-    fn collide_clouds(&mut self, _delta_time: Time) {
+    fn collide_clouds(&mut self, delta_time: Time) {
         for body_id in self.doodles.ids() {
             let (&body_mass, body_collider, body_vel, body_grounded, coyote_timer) = get!(
                 self.doodles,
@@ -204,7 +204,7 @@ impl Model {
                 if let Some(collision) = body_col.collide(&cloud_collider.clone()) {
                     let relative_vel = *body_vel - *cloud_vel;
                     // Collide only when moving down
-                    if relative_vel.y > Coord::ZERO {
+                    if relative_vel.y > Coord::ZERO || collision.normal.y > Coord::ZERO {
                         continue;
                     }
 
@@ -216,7 +216,10 @@ impl Model {
 
                     // Move the cloud
                     let penetration = collision.normal * collision.penetration;
-                    cloud_collider.position.shift(vec2::UNIT_Y * penetration.y);
+                    let cloud_shift_speed = 5.0.as_r32();
+                    cloud_collider.position.shift(
+                        vec2::UNIT_Y * penetration.y.clamp_abs(cloud_shift_speed * delta_time),
+                    );
 
                     // Fix horizontal velocity
                     cloud_vel.y += relative_vel.y * cloud_factor;
