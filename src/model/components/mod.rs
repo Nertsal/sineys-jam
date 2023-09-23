@@ -79,7 +79,7 @@ pub struct Cloud {
 
 impl Cloud {
     pub fn new(position: Position) -> Self {
-        let body = Body::new(Collider::new(position, Shape::rectangle(1.5, 0.5)), 2.0);
+        let body = Body::new(Collider::new(position, Shape::rectangle(1.5, 0.5)), 5.0);
         Self {
             anchor: body.collider.position,
             body,
