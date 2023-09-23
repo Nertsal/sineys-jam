@@ -157,6 +157,7 @@ impl Model {
     }
 
     pub fn collide_triggers(&mut self, _delta_time: Time) {
+        let mut particles = Vec::new();
         for body_id in self.doodles.ids() {
             let (body_collider, body_vel, &body_mass, active_triggers) = get!(
                 self.doodles,
@@ -206,6 +207,13 @@ impl Model {
                                     *cloud_velocity -= jump * r32(0.3) * cloud_factor;
                                 }
                             }
+
+                            particles.push((
+                                r32(5.0),
+                                trigger_col.position,
+                                -vec2::UNIT_Y * r32(0.2),
+                                Color::try_from("#2148AB").unwrap(),
+                            ));
                         }
                         TriggerKind::Coin => {
                             self.triggers.remove(trigger_id);
@@ -213,11 +221,21 @@ impl Model {
                             let mut sfx = self.assets.sfx.coin.effect();
                             sfx.set_volume(0.2);
                             sfx.play();
+                            particles.push((
+                                r32(5.0),
+                                trigger_col.position,
+                                vec2::ZERO,
+                                Color::try_from("#E6AC4C").unwrap(),
+                            ));
                         }
                     }
                 }
             }
             *active_triggers = triggers;
+        }
+
+        for (intensity, position, velocity, color) in particles {
+            self.spawn_particles(intensity, position, velocity, color);
         }
     }
 }

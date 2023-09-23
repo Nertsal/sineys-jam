@@ -62,6 +62,13 @@ impl Model {
             // Recoil
             let recoil = 5.0.as_r32();
             *velocity -= dir * recoil;
+
+            self.spawn_particles(
+                r32(3.0),
+                position,
+                dir * speed * r32(0.3),
+                Rgba::try_from("#4B071A").unwrap(),
+            );
         }
     }
 
