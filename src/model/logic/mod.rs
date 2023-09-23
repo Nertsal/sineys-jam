@@ -193,6 +193,7 @@ impl Model {
     }
 
     fn collide_clouds(&mut self, delta_time: Time) {
+        let mut target_shhh_volume = 0.0_f64;
         for body_id in self.doodles.ids() {
             let (&body_mass, body_collider, body_vel, body_grounded, coyote_timer) = get!(
                 self.doodles,
@@ -229,6 +230,16 @@ impl Model {
                     *body_grounded = Some(cloud_id);
                     *coyote_timer = Instant::now();
 
+                    target_shhh_volume = target_shhh_volume
+                        .max((relative_vel.y.abs().as_f32() as f64 / 5.0).clamp(0.3, 1.0));
+                    if self.shhh.is_none() {
+                        self.shhh = Some(self.assets.sfx.shhh.effect());
+                        let sfx = self.shhh.as_mut().unwrap();
+                        self.shhh_volume = target_shhh_volume;
+                        sfx.set_volume(self.shhh_volume);
+                        sfx.play();
+                    }
+
                     let body_factor = cloud_mass / (body_mass + cloud_mass);
                     let cloud_factor = body_mass / (body_mass + cloud_mass);
 
@@ -243,6 +254,15 @@ impl Model {
                     cloud_vel.y += relative_vel.y * cloud_factor;
                     body_vel.y -= relative_vel.y * body_factor;
                 }
+            }
+        }
+        let fade_time = 0.3;
+        self.shhh_volume += (target_shhh_volume - self.shhh_volume).clamp_abs(delta_time.as_f32() as f64 / fade_time);
+        if let Some(sfx) = &mut self.shhh {
+            sfx.set_volume(self.shhh_volume);
+            if self.shhh_volume <= 1e-5 {
+                sfx.stop();
+                self.shhh = None;
             }
         }
     }

@@ -8,6 +8,7 @@ pub struct Sfx {
     pub oi: geng::Sound,
     pub kill_bird: geng::Sound,
     pub shoot: geng::Sound,
+    pub shhh: geng::Sound,
 }
 
 #[derive(geng::asset::Load)]

@@ -26,6 +26,8 @@ pub struct Model {
     pub projectiles: StructOf<Arena<Projectile>>,
     pub triggers: StructOf<Arena<Trigger>>,
     pub assets: Rc<Assets>,
+    pub shhh: Option<geng::SoundEffect>,
+    pub shhh_volume: f64,
 }
 
 impl Model {
@@ -38,6 +40,8 @@ impl Model {
             10.0,
         )));
         Self {
+            shhh_volume: 0.0,
+            shhh: None,
             assets,
             time: Time::ZERO,
             world_width,
