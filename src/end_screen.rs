@@ -20,18 +20,26 @@ impl EndScreen {
 
 impl geng::State for EndScreen {
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
-        ugli::clear(framebuffer, Some(Rgba::BLACK), None, None);
+        let camera = geng::Camera2d {
+            center: vec2::ZERO,
+            rotation: Angle::ZERO,
+            fov: 10.0,
+        };
+        ugli::clear(framebuffer, Some("#e3e9f8".try_into().unwrap()), None, None);
+        self.geng.draw2d().draw2d(
+            framebuffer,
+            &camera,
+            &draw2d::TexturedQuad::unit(&self.assets.end).scale(
+                vec2(self.assets.end.size().map(|x| x as f32).aspect(), 1.0) * camera.fov / 2.0,
+            ),
+        );
         self.geng.default_font().draw(
             framebuffer,
-            &geng::Camera2d {
-                center: vec2::ZERO,
-                rotation: Angle::ZERO,
-                fov: 10.0,
-            },
-            &format!("GG\n\nyour score:\n{}", self.score),
+            &camera,
+            &self.score.to_string(),
             vec2::splat(geng::TextAlign::CENTER),
-            mat3::translate(vec2(0.0, 3.0)),
-            Rgba::WHITE,
+            mat3::translate(vec2(0.0, -3.0)),
+            "#90455a".try_into().unwrap(),
         )
     }
     fn handle_event(&mut self, event: geng::Event) {
