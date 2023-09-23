@@ -61,6 +61,25 @@ impl GameRender {
                 framebuffer,
             );
         }
+        for (_, (collider, &color, lifetime)) in
+            query!(model.particles, (&body.collider, &color, &lifetime))
+        {
+            let t = lifetime.get_ratio().as_f32();
+            let t = 3.0 * t * t - 2.0 * t * t * t;
+
+            let mut color = color;
+            color.a *= 0.5 * t;
+
+            let scale = t;
+
+            self.draw_collider_transformed(
+                &collider.clone(),
+                color,
+                mat3::scale_uniform(scale),
+                &model.camera,
+                framebuffer,
+            );
+        }
 
         self.geng.default_font().draw(
             framebuffer,
@@ -168,10 +187,21 @@ impl GameRender {
         );
     }
 
-    fn draw_collider(
+    // fn draw_collider(
+    //     &self,
+    //     collider: &Collider,
+    //     color: Color,
+    //     camera: &Camera,
+    //     framebuffer: &mut ugli::Framebuffer,
+    // ) {
+    //     self.draw_collider_transformed(collider, color, mat3::identity(), camera, framebuffer);
+    // }
+
+    fn draw_collider_transformed(
         &self,
         collider: &Collider,
         color: Color,
+        transform: mat3<f32>,
         camera: &Camera,
         framebuffer: &mut ugli::Framebuffer,
     ) {
@@ -182,7 +212,9 @@ impl GameRender {
             Shape::Circle { radius } => self.geng.draw2d().draw2d(
                 framebuffer,
                 camera,
-                &draw2d::Ellipse::circle(pos, radius.as_f32(), color),
+                &draw2d::Ellipse::circle(vec2::ZERO, radius.as_f32(), color)
+                    .transform(transform)
+                    .translate(pos),
             ),
             Shape::Rectangle { width, height } => self.geng.draw2d().draw2d(
                 framebuffer,
@@ -191,6 +223,7 @@ impl GameRender {
                     Aabb2::ZERO.extend_symmetric(vec2(width, height).as_f32() / 2.0),
                     color,
                 )
+                .transform(transform)
                 .rotate(rotation)
                 .translate(pos),
             ),

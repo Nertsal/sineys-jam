@@ -2,6 +2,7 @@ use super::*;
 
 impl Model {
     pub fn collide_clouds(&mut self, delta_time: Time) {
+        let mut particles = Vec::new();
         let mut target_shhh_volume = 0.0_f64;
         for body_id in self.doodles.ids() {
             let (&body_mass, body_collider, body_vel, body_grounded, coyote_timer) = get!(
@@ -36,6 +37,15 @@ impl Model {
                         continue;
                     }
 
+                    if body_grounded.is_none() {
+                        particles.push((
+                            r32(5.0),
+                            collision.point,
+                            -vec2::UNIT_Y * r32(0.1),
+                            Color::try_from("#5772B5").unwrap(),
+                        ));
+                    }
+
                     *body_grounded = Some(cloud_id);
                     *coyote_timer = Instant::now();
 
@@ -65,6 +75,11 @@ impl Model {
                 }
             }
         }
+
+        for (intensity, position, velocity, color) in particles {
+            self.spawn_particles(intensity, position, velocity, color);
+        }
+
         let fade_time = 0.3;
         self.shhh_volume += (target_shhh_volume - self.shhh_volume)
             .clamp_abs(delta_time.as_f32() as f64 / fade_time);

@@ -2,6 +2,7 @@ mod collision;
 mod control;
 mod generation;
 mod movement;
+mod particles;
 
 use super::*;
 
@@ -23,6 +24,7 @@ impl Model {
 
         self.camera_control(delta_time);
 
+        self.update_particles(delta_time);
         self.lifetime(delta_time);
         self.check_ded();
         self.despawn_below();

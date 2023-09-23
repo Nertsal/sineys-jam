@@ -27,6 +27,7 @@ pub struct Model {
     pub clouds: StructOf<Arena<Cloud>>,
     pub projectiles: StructOf<Arena<Projectile>>,
     pub triggers: StructOf<Arena<Trigger>>,
+    pub particles: StructOf<Arena<Particle>>,
     geng: Geng,
     pub assets: Rc<Assets>,
     pub shhh: Option<geng::SoundEffect>,
@@ -69,6 +70,7 @@ impl Model {
             clouds: default(),
             projectiles: default(),
             triggers: default(),
+            particles: default(),
         }
     } 
 

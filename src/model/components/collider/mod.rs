@@ -99,10 +99,9 @@ impl Collider {
             let normal = contact.normal1.into_inner();
             let point = contact.point1;
             Collision {
-                point: PositionCylinder::from_world(
-                    vec2(point.x, point.y).map(Coord::new),
-                    self.position.world_width(),
-                ),
+                point: self
+                    .position
+                    .shifted(vec2(point.x, point.y).map(Coord::new)),
                 normal: vec2(normal.x, normal.y).map(Coord::new),
                 penetration: Coord::new(-contact.dist),
             }

@@ -171,3 +171,26 @@ impl Trigger {
         }
     }
 }
+
+#[derive(SplitFields)]
+pub struct Particle {
+    #[split(nested)]
+    pub body: Body,
+    pub color: Color,
+    pub lifetime: Lifetime,
+}
+
+impl Particle {
+    pub fn new(position: Position, velocity: vec2<Coord>, color: Color) -> Self {
+        let mut body = Body::new(
+            Collider::new(position, Shape::Circle { radius: r32(0.1) }),
+            1.0,
+        );
+        body.velocity = velocity;
+        Self {
+            body,
+            color,
+            lifetime: Lifetime::new_max(r32(0.6)),
+        }
+    }
+}
