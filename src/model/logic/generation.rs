@@ -3,13 +3,12 @@ use super::*;
 impl Model {
     pub fn generate_level(&mut self, delta_time: Time) {
         let mut rng = thread_rng();
-        let player_pos = self
-            .doodles
-            .body
-            .collider
-            .position
-            .get(self.player.body)
-            .unwrap();
+        let (&player_pos, &player_vel) = get!(
+            self.doodles,
+            self.player.body,
+            (&body.collider.position, &body.velocity)
+        )
+        .unwrap();
 
         if self.clouds.ids().is_empty() {
             // Initial stuff
@@ -38,7 +37,9 @@ impl Model {
         while self.next_bird < Time::ZERO {
             self.next_bird += rng.gen_range(0.7..=2.0).as_r32();
 
-            let height = rng.gen_range(1.0..=3.0).as_r32();
+            let predict_time = rng.gen_range(1.0..=2.0).as_r32();
+            let height = predict_time * player_vel.y;
+
             let position = player_pos.shifted(vec2(self.world_width / r32(2.0), height));
 
             let dir = if rng.gen() { 1.0 } else { -1.0 };
