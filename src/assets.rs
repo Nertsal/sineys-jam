@@ -13,7 +13,8 @@ pub struct Sfx {
 
 #[derive(geng::asset::Load)]
 pub struct Sprites {
-    pub background: ugli::Texture,
+    #[load(list = "0..=1", path = "background_*.png")]
+    pub backgrounds: Vec<ugli::Texture>,
     #[load(load_with = "load_gif(&manager, &base_path.join(\"doodle.gif\"))")]
     pub doodle: Vec<GifFrame>,
     #[load(load_with = "load_gif(&manager, &base_path.join(\"bird.gif\"))")]
