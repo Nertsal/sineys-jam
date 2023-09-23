@@ -18,7 +18,12 @@ impl GameRender {
             self.draw_collider(&collider.clone(), Color::GREEN, &model.camera, framebuffer);
         }
         for (_, (collider,)) in query!(model.clouds, (&body.collider)) {
-            self.draw_collider(&collider.clone(), Color::WHITE, &model.camera, framebuffer);
+            self.draw_sprite(
+                &collider.clone(),
+                &self.assets.sprites.cloud,
+                &model.camera,
+                framebuffer,
+            );
         }
         for (_, (collider,)) in query!(model.doodles, (&body.collider)) {
             self.draw_animation(
@@ -30,10 +35,21 @@ impl GameRender {
             );
         }
         for (_, (collider,)) in query!(model.birds, (&body.collider)) {
-            self.draw_collider(&collider.clone(), Color::BLUE, &model.camera, framebuffer);
+            self.draw_animation(
+                &collider.clone(),
+                &self.assets.sprites.bird,
+                model.time,
+                &model.camera,
+                framebuffer,
+            );
         }
         for (_, (collider,)) in query!(model.projectiles, (&body.collider)) {
-            self.draw_collider(&collider.clone(), Color::RED, &model.camera, framebuffer);
+            self.draw_sprite(
+                &collider.clone(),
+                &self.assets.sprites.bullet,
+                &model.camera,
+                framebuffer,
+            );
         }
     }
 
@@ -61,15 +77,25 @@ impl GameRender {
         }
         let frame = &animation[i];
 
+        self.draw_sprite(collider, &frame.texture, camera, framebuffer);
+    }
+
+    fn draw_sprite(
+        &self,
+        collider: &Collider,
+        texture: &ugli::Texture,
+        camera: &Camera,
+        framebuffer: &mut ugli::Framebuffer,
+    ) {
         let pos = camera.project_f32(collider.position);
         let target = collider.compute_aabb().map(Coord::as_f32);
         let target = target.translate(pos - target.center());
 
-        let target = geng_utils::layout::fit_aabb_width(frame.texture.size().as_f32(), target, 1.0);
+        let target = geng_utils::layout::fit_aabb_width(texture.size().as_f32(), target, 1.0);
         self.geng.draw2d().draw2d(
             framebuffer,
             camera,
-            &draw2d::TexturedQuad::new(target, &frame.texture),
+            &draw2d::TexturedQuad::new(target, texture),
         );
     }
 
