@@ -19,6 +19,7 @@ pub struct Sprites {
     pub bird: Vec<GifFrame>,
     pub bullet: ugli::Texture,
     pub cloud: ugli::Texture,
+    pub spring: ugli::Texture,
 }
 
 #[derive(geng::asset::Load)]

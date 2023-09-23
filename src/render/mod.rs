@@ -17,7 +17,12 @@ impl GameRender {
         self.draw_background(model, framebuffer);
 
         for (_, (collider,)) in query!(model.triggers, (&collider)) {
-            self.draw_collider(&collider.clone(), Color::GREEN, &model.camera, framebuffer);
+            self.draw_sprite(
+                &collider.clone(),
+                &self.assets.sprites.spring,
+                &model.camera,
+                framebuffer,
+            );
         }
         for (_, (collider,)) in query!(model.clouds, (&body.collider)) {
             self.draw_sprite(

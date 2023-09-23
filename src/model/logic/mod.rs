@@ -12,6 +12,8 @@ impl Model {
 
         self.collide_clouds(delta_time);
         self.collide_birds(delta_time);
+
+        self.attached_triggers(delta_time);
         self.collide_triggers(delta_time);
 
         self.camera_control(delta_time);
@@ -166,7 +168,9 @@ impl Model {
             .unwrap();
             position.shift(velocity * delta_time);
         }
+    }
 
+    fn attached_triggers(&mut self, delta_time: Time) {
         // Triggers that are attached
         for id in self.triggers.ids() {
             let Some((position, attachment)) = get!(
