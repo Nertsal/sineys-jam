@@ -9,6 +9,7 @@ pub struct Sfx {
     pub kill_bird: geng::Sound,
     pub shoot: geng::Sound,
     pub shhh: geng::Sound,
+    pub coin: geng::Sound,
 }
 
 #[derive(geng::asset::Load)]
@@ -22,6 +23,7 @@ pub struct Sprites {
     pub bullet: ugli::Texture,
     pub cloud: ugli::Texture,
     pub spring: ugli::Texture,
+    pub coin: ugli::Texture,
 }
 
 #[derive(geng::asset::Load)]

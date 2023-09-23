@@ -20,13 +20,12 @@ impl GameRender {
     pub fn draw(&mut self, model: &Model, framebuffer: &mut ugli::Framebuffer) {
         self.draw_background(model, framebuffer);
 
-        for (_, (collider,)) in query!(model.triggers, (&collider)) {
-            self.draw_sprite(
-                &collider.clone(),
-                &self.assets.sprites.spring,
-                &model.camera,
-                framebuffer,
-            );
+        for (_, (collider, kind)) in query!(model.triggers, (&collider, &kind)) {
+            let texture = match kind {
+                TriggerKind::Spring => &self.assets.sprites.spring,
+                TriggerKind::Coin => &self.assets.sprites.coin,
+            };
+            self.draw_sprite(&collider.clone(), texture, &model.camera, framebuffer);
         }
         for (_, (collider,)) in query!(model.clouds, (&body.collider)) {
             self.draw_sprite(

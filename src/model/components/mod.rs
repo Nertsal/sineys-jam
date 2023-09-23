@@ -135,6 +135,7 @@ pub struct Trigger {
 #[derive(Debug, Clone)]
 pub enum TriggerKind {
     Spring,
+    Coin,
 }
 
 #[derive(Debug, Clone)]
@@ -152,6 +153,19 @@ impl Trigger {
             collider,
             attached_to: Some(Attachment {
                 relative_pos: vec2(0.0, 0.3).as_r32(),
+                cloud,
+            }),
+        }
+    }
+
+    pub fn coin(cloud: Option<Id>, world_width: Coord) -> Self {
+        let position = Position::zero(world_width);
+        let collider = Collider::new(position, Shape::circle(0.3));
+        Self {
+            kind: TriggerKind::Coin,
+            collider,
+            attached_to: cloud.map(|cloud| Attachment {
+                relative_pos: vec2(0.0, 0.5).as_r32(),
                 cloud,
             }),
         }

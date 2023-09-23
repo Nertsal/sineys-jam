@@ -173,6 +173,11 @@ impl Model {
                                 }
                             }
                         }
+                        TriggerKind::Coin => {
+                            self.triggers.remove(trigger_id);
+                            self.score += 100;
+                            self.assets.sfx.coin.play();
+                        }
                     }
                 }
             }
