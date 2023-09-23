@@ -83,7 +83,11 @@ impl Model {
         )
         .unwrap();
 
-        self.camera.target_position = player_pos;
+        self.camera.target_position.shift({
+            let mut delta = self.camera.target_position.delta_to(player_pos);
+            delta.y = delta.y.max(R32::ZERO);
+            delta
+        });
         let delta = self.camera.center.delta_to(self.camera.target_position);
         let time = 0.3.as_r32();
         self.camera
