@@ -176,19 +176,22 @@ impl Model {
 
     fn collide_clouds(&mut self, _delta_time: Time) {
         for body_id in self.doodles.ids() {
-            let (&body_mass, body_collider, body_vel, body_grounded) = get!(
+            let (&body_mass, body_collider, body_vel, body_grounded, coyote_timer) = get!(
                 self.doodles,
                 body_id,
                 (
                     &body.mass,
                     &mut body.collider,
                     &mut body.velocity,
-                    &mut grounded
+                    &mut grounded,
+                    &mut coyote_timer,
                 )
             )
             .unwrap();
             let body_col = body_collider.clone();
-            *body_grounded = None;
+            if coyote_timer.elapsed().as_secs_f64() > 0.2 {
+                *body_grounded = None;
+            }
 
             for cloud_id in self.clouds.ids() {
                 let (&cloud_mass, cloud_collider, cloud_vel) = get!(
@@ -206,6 +209,7 @@ impl Model {
                     }
 
                     *body_grounded = Some(cloud_id);
+                    *coyote_timer = Instant::now();
 
                     let body_factor = cloud_mass / (body_mass + cloud_mass);
                     let cloud_factor = body_mass / (body_mass + cloud_mass);

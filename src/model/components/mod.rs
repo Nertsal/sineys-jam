@@ -25,12 +25,36 @@ impl Body {
     }
 }
 
+// Nertsal: why do all compoennts need to be Clone + Debug???????????
+#[derive(Copy, Clone)]
+pub struct Instant {
+    inner: time::Instant,
+}
+
+impl Instant {
+    pub fn now() -> Self {
+        Self {
+            inner: time::Instant::now(),
+        }
+    }
+    pub fn elapsed(&self) -> time::Duration {
+        self.inner.elapsed()
+    }
+}
+
+impl std::fmt::Debug for Instant {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "instant :)")
+    }
+}
+
 #[derive(SplitFields)]
 pub struct Doodle {
     #[split(nested)]
     pub body: Body,
     pub grounded: Option<Id>,
     pub active_triggers: Vec<Id>,
+    pub coyote_timer: Instant,
 }
 
 impl Doodle {
@@ -39,6 +63,7 @@ impl Doodle {
             body,
             grounded: None,
             active_triggers: Vec::new(),
+            coyote_timer: Instant::now(),
         }
     }
 }
